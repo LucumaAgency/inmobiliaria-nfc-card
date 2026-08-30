@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ProbaCard Tiendas</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#FBB900">
+<!-- iOS no lee el manifest: necesita sus propias etiquetas -->
+<link rel="apple-touch-icon" href="/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="ProbaCard">
+<link rel="stylesheet" href="/estilos.css">
+</head>
+<body>
+
+<div id="barra-conexion" class="offline oculto">Sin conexión · trabajando con datos guardados</div>
+
+<!-- LOGIN -->
+<section id="p-login" class="pantalla">
+  <div class="caja-centro">
+    <div class="marca">Proba<span>Card</span></div>
+    <p class="sub">Validación en caja</p>
+    <form id="form-login">
+      <label>Usuario<input name="usuario" autocomplete="username" required></label>
+      <label>Clave<input name="clave" type="password" autocomplete="current-password" required></label>
+      <button class="btn" type="submit">Ingresar</button>
+      <p id="error-login" class="error oculto"></p>
+    </form>
+    <p class="pie">La sesión dura 30 días. No cierres sesión al terminar el turno.</p>
+  </div>
+</section>
+
+<!-- CAJA -->
+<section id="p-caja" class="pantalla oculto">
+  <header class="cabecera">
+    <div>
+      <strong id="nombre-tienda">—</strong>
+      <span id="beneficio-tienda" class="chip">—</span>
+    </div>
+    <button id="btn-menu" class="icono" aria-label="Menú">⋯</button>
+  </header>
+
+  <div class="cuerpo">
+    <button id="btn-nfc" class="btn grande oculto">Acercar tarjeta (NFC)</button>
+
+    <label class="campo-token">Código de la tarjeta
+      <input id="input-token" placeholder="AB12XY" autocapitalize="characters" autocomplete="off">
+    </label>
+    <button id="btn-validar" class="btn">Validar</button>
+
+    <details class="respaldo">
+      <summary>El cliente olvidó su tarjeta</summary>
+      <label>DNI o celular
+        <input id="input-buscar" inputmode="numeric" placeholder="45879632">
+      </label>
+      <button id="btn-buscar" class="btn secundario">Buscar cliente</button>
+      <div id="resultados-busqueda"></div>
+    </details>
+
+    <p id="pendientes" class="pendientes oculto"></p>
+
+    <!-- iOS no muestra banner de instalación automático: hay que explicarlo -->
+    <div id="ayuda-ios" class="ayuda-ios oculto">
+      <p><strong>Instala ProbaCard en este equipo</strong><br>
+      Toca <strong>Compartir</strong> en la barra de Safari y elige <strong>Agregar a inicio</strong>.
+      Así funciona sin conexión y sin barra del navegador.</p>
+      <button id="btn-cerrar-ayuda" class="btn secundario">Entendido</button>
+    </div>
+  </div>
+</section>
+
+<!-- RESULTADO -->
+<section id="p-resultado" class="pantalla oculto">
+  <div id="banner-resultado" class="banner">
+    <div id="icono-resultado" class="icono-grande">✓</div>
+    <div id="texto-resultado" class="texto-resultado">VÁLIDO</div>
+    <div id="motivo-resultado" class="motivo"></div>
+  </div>
+
+  <div class="ficha">
+    <div id="foto-cliente" class="foto">?</div>
+    <div>
+      <div id="nombre-cliente" class="nombre">—</div>
+      <div id="doc-cliente" class="doc">—</div>
+    </div>
+  </div>
+  <p class="aviso">Compara la foto y el documento con la persona antes de aplicar el descuento.</p>
+
+  <div id="bloque-monto">
+    <label>Monto de la compra (S/)
+      <input id="input-monto" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00">
+    </label>
+    <button id="btn-confirmar" class="btn">Aplicar descuento y registrar</button>
+  </div>
+
+  <button id="btn-volver" class="btn secundario">Volver</button>
+</section>
+
+<!-- MENÚ -->
+<section id="p-menu" class="pantalla oculto">
+  <header class="cabecera"><strong>Menú</strong><button id="btn-cerrar-menu" class="icono">✕</button></header>
+  <div class="cuerpo">
+    <button id="btn-sync" class="btn secundario">Sincronizar ahora</button>
+    <button id="btn-instalar" class="btn secundario oculto">Instalar en pantalla de inicio</button>
+    <h3>Últimos canjes</h3>
+    <div id="lista-canjes" class="lista">—</div>
+    <button id="btn-salir" class="btn peligro">Cerrar sesión</button>
+    <p class="pie" id="info-sync">—</p>
+  </div>
+</section>
+
+<script src="/app.js"></script>
+</body>
+</html>

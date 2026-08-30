@@ -1,0 +1,15 @@
+{
+  "name": "probacard",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Plataforma de tarjeta de beneficios con chip NFC: validacion en caja, panel y carnet digital",
+  "main": "server.js",
+  "engines": { "node": "22.x" },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test \"test/*.test.js\"",
+    "seed": "node scripts/seed.js"
+  },
+  "license": "UNLICENSED"
+}

@@ -1,0 +1,91 @@
+{
+  "tiendas": [
+    {
+      "id": "T-001",
+      "nombre": "Cevichería El Pez On",
+      "rubro": "Restaurante",
+      "beneficio": "15% en carta",
+      "condiciones": "No acumulable con otras promociones. Lunes a jueves.",
+      "topeDiario": 1
+    },
+    {
+      "id": "T-002",
+      "nombre": "Botica Salud Norte",
+      "rubro": "Farmacia",
+      "beneficio": "10% en genéricos",
+      "condiciones": "No aplica a productos con receta retenida.",
+      "topeDiario": 2
+    },
+    {
+      "id": "T-003",
+      "nombre": "Gimnasio Fuerza Lima",
+      "rubro": "Gimnasio",
+      "beneficio": "20% en mensualidad",
+      "condiciones": "Una vez por mes.",
+      "topeDiario": 1
+    }
+  ],
+  "usuarios": [
+    {
+      "usuario": "pezon",
+      "clave": "demo123",
+      "tiendaId": "T-001",
+      "nombre": "Caja 1 - El Pez On"
+    },
+    {
+      "usuario": "botica",
+      "clave": "demo123",
+      "tiendaId": "T-002",
+      "nombre": "Caja - Botica Salud Norte"
+    },
+    {
+      "usuario": "gym",
+      "clave": "demo123",
+      "tiendaId": "T-003",
+      "nombre": "Recepción - Fuerza Lima"
+    }
+  ],
+  "clientes": [
+    {
+      "id": "C-001",
+      "token": "AB12XY",
+      "nombre": "Juan Pérez Ramos",
+      "doc": "45879632",
+      "celular": "987654321",
+      "estado": "activa",
+      "vence": "2027-08-30",
+      "foto": null
+    },
+    {
+      "id": "C-002",
+      "token": "CD34ZW",
+      "nombre": "María Quispe Loayza",
+      "doc": "70112233",
+      "celular": "912345678",
+      "estado": "activa",
+      "vence": "2027-08-30",
+      "foto": null
+    },
+    {
+      "id": "C-003",
+      "token": "EF56KL",
+      "nombre": "Carlos Medina Sáenz",
+      "doc": "08123456",
+      "celular": "999888777",
+      "estado": "suspendida",
+      "vence": "2027-08-30",
+      "foto": null
+    },
+    {
+      "id": "C-004",
+      "token": "GH78MN",
+      "nombre": "Rosa Ttito Huamán",
+      "doc": "76543210",
+      "celular": "955443322",
+      "estado": "activa",
+      "vence": "2025-01-01",
+      "foto": null
+    }
+  ],
+  "canjes": []
+}

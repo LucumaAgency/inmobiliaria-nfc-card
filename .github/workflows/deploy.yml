@@ -1,0 +1,59 @@
+name: Desplegar a Plesk
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-produccion
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: produccion
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Pruebas antes de desplegar
+        run: npm test
+
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.PLESK_SSH_KEY }}
+
+      - name: Confiar en el host
+        run: ssh-keyscan -H ${{ secrets.PLESK_HOST }} >> ~/.ssh/known_hosts
+
+      # --delete limpia archivos borrados, pero .env y uploads/ viven solo
+      # en el servidor: si el deploy los pisa, se cae el sitio o se pierden
+      # las fotos de los clientes.
+      - name: Subir archivos
+        run: |
+          rsync -az --delete \
+            --exclude '.git' \
+            --exclude '.github' \
+            --exclude 'node_modules' \
+            --exclude '.env' \
+            --exclude 'uploads' \
+            --exclude 'tmp' \
+            --exclude 'data/db.json' \
+            ./ ${{ secrets.PLESK_USER }}@${{ secrets.PLESK_HOST }}:${{ secrets.PLESK_PATH }}/
+
+      - name: Instalar dependencias y reiniciar Passenger
+        run: |
+          ssh ${{ secrets.PLESK_USER }}@${{ secrets.PLESK_HOST }} \
+            "cd ${{ secrets.PLESK_PATH }} && \
+             npm ci --omit=dev --no-audit --no-fund 2>/dev/null || true && \
+             mkdir -p tmp && touch tmp/restart.txt"
+
+      - name: Verificar que responde
+        run: |
+          sleep 12
+          curl -fsS --retry 4 --retry-delay 5 "${{ secrets.URL_PRODUCCION }}/api/salud" \
+            || (echo "El sitio no respondió tras el despliegue" && exit 1)
