@@ -2,9 +2,6 @@ node_modules/
 .env
 .env.local
 
-# Base de datos de trabajo. La semilla versionada es data/seed.json
-data/db.json
-
 # Fotos de clientes: nunca al repositorio
 uploads/
 

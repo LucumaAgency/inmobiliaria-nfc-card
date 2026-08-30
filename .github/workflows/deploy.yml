@@ -62,12 +62,13 @@ jobs:
             --exclude 'data/db.json' \
             ./ ${{ secrets.PLESK_USER }}@${{ secrets.PLESK_HOST }}:${{ secrets.PLESK_PATH }}/
 
-      - name: Instalar dependencias y reiniciar Passenger
+      - name: Instalar, migrar la base y reiniciar Passenger
         if: steps.check.outputs.listo == 'si'
         run: |
           ssh ${{ secrets.PLESK_USER }}@${{ secrets.PLESK_HOST }} \
             "cd ${{ secrets.PLESK_PATH }} && \
-             npm ci --omit=dev --no-audit --no-fund 2>/dev/null || true && \
+             npm ci --omit=dev --no-audit --no-fund && \
+             npm run migrate && \
              mkdir -p tmp && touch tmp/restart.txt"
 
       - name: Verificar que responde
