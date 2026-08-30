@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ProbaCard · Panel</title>
+<link rel="icon" href="/icon-192.png">
+<link rel="stylesheet" href="/admin/panel.css">
+</head>
+<body>
+
+<section id="p-login" class="pantalla">
+  <form id="form-login" class="tarjeta-login">
+    <div class="marca">Proba<span>Card</span></div>
+    <p class="sub">Panel de administración</p>
+    <label>Usuario<input name="usuario" autocomplete="username" required></label>
+    <label>Clave<input name="clave" type="password" autocomplete="current-password" required></label>
+    <button class="btn" type="submit">Ingresar</button>
+    <p id="error-login" class="error oculto"></p>
+  </form>
+</section>
+
+<div id="app" class="oculto">
+  <header class="barra">
+    <div class="marca chica">Proba<span>Card</span></div>
+    <nav id="menu">
+      <button data-vista="resumen" class="activo">Resumen</button>
+      <button data-vista="emitir">Emitir</button>
+      <button data-vista="tarjetas">Tarjetas</button>
+      <button data-vista="lotes">Lotes</button>
+      <button data-vista="grabar">Grabar</button>
+      <button data-vista="tiendas">Tiendas</button>
+      <button data-vista="clientes">Clientes</button>
+    </nav>
+    <button id="btn-salir" class="btn-texto">Salir</button>
+  </header>
+
+  <main>
+    <!-- RESUMEN -->
+    <section id="v-resumen" class="vista">
+      <div id="cifras" class="cifras"></div>
+      <h2>Por tienda</h2>
+      <div class="tabla-caja"><table id="tabla-tiendas-resumen"></table></div>
+      <h2>Últimos canjes</h2>
+      <div class="tabla-caja"><table id="tabla-ultimos"></table></div>
+    </section>
+
+    <!-- EMITIR -->
+    <section id="v-emitir" class="vista oculto">
+      <h2>Emitir tarjeta</h2>
+      <p class="ayuda">Liga una tarjeta en blanco a un cliente. Si el documento ya existe, se reutiliza el cliente y su historial.</p>
+      <form id="form-emitir" class="formulario">
+        <label>Código de la tarjeta
+          <span class="con-boton">
+            <input name="token" id="emitir-token" placeholder="ACDEFG" autocapitalize="characters" required>
+            <button type="button" id="btn-leer-nfc" class="btn secundario oculto">Leer NFC</button>
+          </span>
+        </label>
+        <label>Nombre completo<input name="nombre" required></label>
+        <label>Documento<input name="doc" inputmode="numeric" required></label>
+        <label>Celular<input name="celular" inputmode="numeric"></label>
+        <label>Correo<input name="correo" type="email"></label>
+        <label>Vence<input name="vence" type="date"></label>
+        <label class="casilla">
+          <input type="checkbox" name="consentimiento" required>
+          El cliente acepta el tratamiento de sus datos (Ley 29733)
+        </label>
+        <button class="btn" type="submit">Emitir tarjeta</button>
+        <p id="salida-emitir" class="salida oculto"></p>
+      </form>
+    </section>
+
+    <!-- TARJETAS -->
+    <section id="v-tarjetas" class="vista oculto">
+      <h2>Tarjetas</h2>
+      <div class="filtros">
+        <input id="filtro-q" placeholder="Código, nombre o documento">
+        <select id="filtro-estado">
+          <option value="">Todos los estados</option>
+          <option value="en_blanco">En blanco</option>
+          <option value="activa">Activa</option>
+          <option value="suspendida">Suspendida</option>
+          <option value="perdida">Perdida</option>
+          <option value="vencida">Vencida</option>
+        </select>
+        <button id="btn-filtrar" class="btn secundario">Buscar</button>
+      </div>
+      <div class="tabla-caja"><table id="tabla-tarjetas"></table></div>
+    </section>
+
+    <!-- LOTES -->
+    <section id="v-lotes" class="vista oculto">
+      <h2>Lotes de tarjetas</h2>
+      <p class="ayuda">Genera los códigos y descarga el CSV que se le entrega al proveedor de impresión.</p>
+      <form id="form-lote" class="formulario en-linea">
+        <label>Código del lote<input name="codigo" placeholder="LOTE-2026-01" required></label>
+        <label>Cantidad<input name="cantidad" type="number" min="1" max="5000" value="100" required></label>
+        <label>Nota<input name="nota" placeholder="Primer lote del piloto"></label>
+        <button class="btn" type="submit">Generar lote</button>
+      </form>
+      <p id="salida-lote" class="salida oculto"></p>
+      <div class="tabla-caja"><table id="tabla-lotes"></table></div>
+    </section>
+
+    <!-- GRABAR -->
+    <section id="v-grabar" class="vista oculto">
+      <h2>Grabar tarjetas</h2>
+      <p class="ayuda">Escribe la URL en el chip y lo deja de solo lectura. <b>El bloqueo es irreversible:</b> el sistema verifica lo escrito antes de bloquear.</p>
+
+      <div id="aviso-nfc" class="aviso oculto">
+        Este navegador no puede escribir NFC. Usa Chrome en Android, o el grabador por USB con el lector RC522 (ver <code>grabador/</code> en el repositorio).
+      </div>
+
+      <form id="form-grabar" class="formulario en-linea">
+        <label>Lote<select id="grabar-lote"></select></label>
+        <label class="casilla"><input type="checkbox" id="grabar-bloquear" checked> Bloquear el chip tras verificar</label>
+        <button class="btn" type="button" id="btn-grabar">Empezar</button>
+      </form>
+
+      <div id="grabador" class="grabador oculto">
+        <div class="token-grande" id="grabar-token">------</div>
+        <div class="estado" id="grabar-estado">Acerca una tarjeta</div>
+        <div class="contador" id="grabar-contador"></div>
+        <button class="btn secundario" id="btn-parar">Detener</button>
+      </div>
+      <div id="grabar-log" class="log"></div>
+    </section>
+
+    <!-- TIENDAS -->
+    <section id="v-tiendas" class="vista oculto">
+      <h2>Tiendas afiliadas</h2>
+      <details class="bloque">
+        <summary>Agregar tienda</summary>
+        <form id="form-tienda" class="formulario">
+          <label>Nombre<input name="nombre" required></label>
+          <label>Rubro<input name="rubro" placeholder="Restaurante"></label>
+          <label>Distrito<input name="distrito"></label>
+          <label>Dirección<input name="direccion"></label>
+          <label>Beneficio<input name="beneficio" placeholder="15% en carta" required></label>
+          <label>Condiciones<input name="condiciones" placeholder="No acumulable con otras promociones"></label>
+          <label>Tope de usos por día<input name="topeDiario" type="number" min="1" max="20" value="1"></label>
+          <label>Monto mínimo (S/)<input name="montoMinimo" type="number" min="0" step="0.5" value="0"></label>
+          <label>Días válidos<input name="diasValidos" value="1234567" placeholder="1=lunes ... 7=domingo"></label>
+          <button class="btn" type="submit">Crear tienda</button>
+        </form>
+      </details>
+      <details class="bloque">
+        <summary>Crear usuario de caja</summary>
+        <form id="form-usuario" class="formulario">
+          <label>Tienda<select name="tiendaId" id="usuario-tienda"></select></label>
+          <label>Usuario<input name="usuario" placeholder="pezon-caja1" required></label>
+          <label>Nombre visible<input name="nombre" placeholder="Caja 1"></label>
+          <label>Clave<input name="clave" type="password" minlength="8" required></label>
+          <button class="btn" type="submit">Crear usuario</button>
+        </form>
+      </details>
+      <div class="tabla-caja"><table id="tabla-tiendas"></table></div>
+    </section>
+
+    <!-- CLIENTES -->
+    <section id="v-clientes" class="vista oculto">
+      <h2>Clientes</h2>
+      <div class="filtros">
+        <input id="filtro-cliente" placeholder="Nombre, documento o celular">
+        <button id="btn-filtrar-cliente" class="btn secundario">Buscar</button>
+      </div>
+      <div class="tabla-caja"><table id="tabla-clientes"></table></div>
+    </section>
+  </main>
+</div>
+
+<script src="/admin/panel.js"></script>
+</body>
+</html>

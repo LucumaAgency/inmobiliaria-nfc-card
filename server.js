@@ -16,6 +16,7 @@ const { evaluar, cumpleMontoMinimo, publico } = require('./lib/reglas');
 const { limitar, limpiar } = require('./lib/limite');
 const { verificar: verificarClave } = require('./lib/claves');
 const repos = require('./lib/repos');
+const rutasAdmin = require('./lib/rutas-admin');
 const { cerrar } = require('./lib/db');
 
 const PORT = Number(process.env.PORT) || 3020;
@@ -76,6 +77,11 @@ function json(res, code, obj) {
   });
   res.end(JSON.stringify(obj));
 }
+
+json.raw = function (res, code, cuerpo, cabeceras) {
+  res.writeHead(code, { 'Cache-Control': 'no-store', ...cabeceras });
+  res.end(cuerpo);
+};
 
 function leerCuerpo(req) {
   return new Promise((resolve, reject) => {
@@ -175,6 +181,15 @@ const server = http.createServer(async (req, res) => {
 
     // A partir de aquí casi todo pide sesión de caja.
     const usuario = await sesionDe(req);
+
+    // Panel de administración
+    const jsonAdmin = (code, obj) => json(res, code, obj);
+    jsonAdmin.raw = (code, cuerpo, cabeceras) => json.raw(res, code, cuerpo, cabeceras);
+    if (await rutasAdmin.manejar({
+      ruta, req, url, usuario,
+      json: jsonAdmin,
+      leerCuerpo: () => leerCuerpo(req)
+    })) return;
 
     if (ruta === '/api/sesion') {
       if (!usuario) return json(res, 401, { error: 'Sin sesión' });
@@ -308,6 +323,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (ruta === '/' || ruta === '/caja') return estatico(res, 'index.html');
+    if (ruta === '/panel' || ruta === '/panel/') return estatico(res, 'admin/index.html');
     return estatico(res, ruta.slice(1));
 
   } catch (e) {

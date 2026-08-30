@@ -16,6 +16,7 @@
   },
   "license": "UNLICENSED",
   "dependencies": {
-    "mysql2": "^3.24.2"
+    "mysql2": "^3.24.2",
+    "serialport": "^13.0.0"
   }
 }

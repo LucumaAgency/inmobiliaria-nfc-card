@@ -17,8 +17,12 @@ cp .env.example .env      # completar PROBACARD_SECRET y los datos de la base
 npm ci
 npm run migrate           # crea el esquema
 npm run importar          # carga las tiendas y tarjetas de prueba
+node scripts/clave.js admin "una-clave-larga"   # clave del panel
 npm start                 # http://localhost:3020
 ```
+
+- App de caja: `http://localhost:3020`
+- Panel de administración: `http://localhost:3020/panel` (usuario `admin`)
 
 **Usuarios de prueba** (clave `demo123`): `pezon`, `botica`, `gym`.
 **Tarjetas de prueba:** `AB12XY` y `CD34ZW` válidas, `EF56KL` suspendida, `GH78MN` vencida.
@@ -41,7 +45,11 @@ lib/db.js              Pool de MySQL y transacciones.
 lib/claves.js          Hash de claves con scrypt.
 lib/limite.js          Rate limiting en memoria.
 lib/entorno.js         Carga .env sin dependencias.
+lib/rutas-admin.js     Rutas del panel, separadas de las de caja.
+lib/tokens.js          Generación de códigos de tarjeta.
 migrations/            Esquema versionado. npm run migrate aplica lo que falte.
+grabador/              Grabado de chips con RC522 por USB. Ver grabador/README.md.
+public/admin/          Panel de administración.
 scripts/migrar.js      Runner de migraciones, idempotente.
 scripts/importar-json.js  Pasa data/seed.json a MySQL.
 test/                  21 pruebas de reglas, claves y rate limiting.
@@ -56,6 +64,7 @@ docs/                  Documentación del sistema.
 | [`docs/DOCUMENTACION.md`](docs/DOCUMENTACION.md) | Cómo funciona todo el sistema: tarjeta, iOS vs Android, flujos, grabado de chips, datos, legal |
 | [`docs/CHECKLIST-DESARROLLO.md`](docs/CHECKLIST-DESARROLLO.md) | Plan de trabajo por fases, esquema de MySQL y despliegue |
 | [`docs/APP-CAJA.md`](docs/APP-CAJA.md) | La PWA del cajero: API, decisiones de diseño y cómo probarla |
+| [`grabador/README.md`](grabador/README.md) | Grabado y bloqueo de chips: Web NFC y RC522 |
 
 ---
 
@@ -66,7 +75,7 @@ docs/                  Documentación del sistema.
 | App de caja (validación, offline, cola de canjes) | Construida y probada |
 | Repositorio, pruebas y despliegue | Construido |
 | Base de datos MySQL | Construida y probada |
-| Panel de administración | Pendiente |
+| Panel de administración | Construido y probado |
 | Carnet digital y directorio | Pendiente |
 
 ## Despliegue
