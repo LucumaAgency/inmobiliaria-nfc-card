@@ -23,17 +23,34 @@ jobs:
       - name: Pruebas antes de desplegar
         run: npm test
 
-      - uses: webfactory/ssh-agent@v0.9.0
+      # Mientras el Plesk no esté configurado, el despliegue se salta
+      # en vez de fallar y ensuciar el historial de main.
+      - name: ¿Hay servidor configurado?
+        id: check
+        env:
+          HOST: ${{ secrets.PLESK_HOST }}
+        run: |
+          if [ -z "$HOST" ]; then
+            echo "listo=no" >> $GITHUB_OUTPUT
+            echo "::notice::Faltan los secrets del Plesk. Se omite el despliegue."
+          else
+            echo "listo=si" >> $GITHUB_OUTPUT
+          fi
+
+      - if: steps.check.outputs.listo == 'si'
+        uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.PLESK_SSH_KEY }}
 
       - name: Confiar en el host
+        if: steps.check.outputs.listo == 'si'
         run: ssh-keyscan -H ${{ secrets.PLESK_HOST }} >> ~/.ssh/known_hosts
 
       # --delete limpia archivos borrados, pero .env y uploads/ viven solo
       # en el servidor: si el deploy los pisa, se cae el sitio o se pierden
       # las fotos de los clientes.
       - name: Subir archivos
+        if: steps.check.outputs.listo == 'si'
         run: |
           rsync -az --delete \
             --exclude '.git' \
@@ -46,6 +63,7 @@ jobs:
             ./ ${{ secrets.PLESK_USER }}@${{ secrets.PLESK_HOST }}:${{ secrets.PLESK_PATH }}/
 
       - name: Instalar dependencias y reiniciar Passenger
+        if: steps.check.outputs.listo == 'si'
         run: |
           ssh ${{ secrets.PLESK_USER }}@${{ secrets.PLESK_HOST }} \
             "cd ${{ secrets.PLESK_PATH }} && \
@@ -53,6 +71,7 @@ jobs:
              mkdir -p tmp && touch tmp/restart.txt"
 
       - name: Verificar que responde
+        if: steps.check.outputs.listo == 'si'
         run: |
           sleep 12
           curl -fsS --retry 4 --retry-delay 5 "${{ secrets.URL_PRODUCCION }}/api/salud" \
