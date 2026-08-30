@@ -4,12 +4,19 @@
   "private": true,
   "description": "Plataforma de tarjeta de beneficios con chip NFC: validacion en caja, panel y carnet digital",
   "main": "server.js",
-  "engines": { "node": "22.x" },
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
     "test": "node --test \"test/*.test.js\"",
-    "seed": "node scripts/seed.js"
+    "seed": "node scripts/seed.js",
+    "migrate": "node scripts/migrar.js",
+    "importar": "node scripts/importar-json.js"
   },
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "dependencies": {
+    "mysql2": "^3.24.2"
+  }
 }

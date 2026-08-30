@@ -3,6 +3,8 @@
  * Node puro, sin dependencias. Base de datos en JSON (data/db.json).
  * Fase 1: suficiente para el piloto. Migrar a MySQL cuando pase de ~5 tiendas.
  */
+require('./lib/entorno').cargar();
+
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
