@@ -95,29 +95,73 @@ async function validar(token) {
     // Sin red: resolvemos con el padrón cacheado.
     const local = await leerDe('padron', token);
     if (!local) return mostrarResultado({ estado: 'NO_EXISTE', motivo: 'Sin conexión y no está en los datos guardados', cliente: null });
-    const vencida = local.vence < new Date().toISOString().slice(0, 10);
-    mostrarResultado({
-      estado: local.estado !== 'activa' ? 'SUSPENDIDA' : vencida ? 'VENCIDA' : 'VALIDO',
-      motivo: local.estado !== 'activa' ? 'Tarjeta suspendida' : vencida ? `Venció el ${local.vence}` : 'Validado sin conexión',
-      cliente: local, offline: true
-    });
+    mostrarResultado({ ...evaluarLocal(local), cliente: local, token: local.token, offline: true });
   }
+}
+
+/**
+ * Cada estado tiene su color, su titulo y, sobre todo, que debe hacer el
+ * cajero. El color ocupa la pantalla para que la decision se tome de reojo.
+ */
+const ESTADOS = {
+  VALIDO:        { color: 'ok',    signo: '✓', titulo: 'VÁLIDO' },
+  TOPE:          { color: 'aviso', signo: '!', titulo: 'YA LA USÓ HOY',
+                   hacer: 'Cobra sin descuento.' },
+  DIA_NO_VALIDO: { color: 'aviso', signo: '!', titulo: 'HOY NO APLICA',
+                   hacer: 'El beneficio no corre este día. Cobra sin descuento.' },
+  SIN_ACTIVAR:   { color: 'info',  signo: '•', titulo: 'SIN ACTIVAR',
+                   hacer: 'El cliente debe activarla: que acerque la tarjeta a su celular.' },
+  SIN_BENEFICIO: { color: 'info',  signo: '•', titulo: 'SIN BENEFICIO',
+                   hacer: 'Esta tienda no tiene un beneficio vigente. Avisa a Proba.' },
+  VENCIDA:       { color: 'mal',   signo: '✕', titulo: 'VENCIDA',
+                   hacer: 'Deriva al cliente a Proba para renovarla.' },
+  SUSPENDIDA:    { color: 'mal',   signo: '✕', titulo: 'SUSPENDIDA',
+                   hacer: 'No apliques el descuento.' },
+  BLOQUEADA:     { color: 'mal',   signo: '✕', titulo: 'BLOQUEADA',
+                   hacer: 'Fue reportada como perdida. No apliques el descuento.' },
+  NO_EXISTE:     { color: 'mal',   signo: '✕', titulo: 'NO REGISTRADA',
+                   hacer: 'Revisa el código o búscalo por DNI.' }
+};
+
+/**
+ * Reglas aplicadas con el padron cacheado. El servidor sigue mandando: esto
+ * solo evita quedarse ciego cuando no hay señal. No conoce los canjes de
+ * hoy, asi que no puede aplicar el tope diario.
+ */
+function evaluarLocal(local) {
+  const hoy = new Date().toLocaleDateString('en-CA');   // fecha local, no UTC
+  if (local.estado === 'en_blanco') return { estado: 'SIN_ACTIVAR', motivo: null };
+  if (local.estado === 'perdida') return { estado: 'BLOQUEADA', motivo: null };
+  if (local.estado === 'suspendida') return { estado: 'SUSPENDIDA', motivo: null };
+  if (local.estado === 'vencida' || (local.vence && local.vence < hoy)) {
+    return { estado: 'VENCIDA', motivo: local.vence ? `Venció el ${local.vence}` : null };
+  }
+  return { estado: 'VALIDO', motivo: 'Validado sin conexión' };
 }
 
 function mostrarResultado(r) {
   const ok = r.estado === 'VALIDO';
+  const info = ESTADOS[r.estado] || { color: 'mal', signo: '✕', titulo: r.estado.replace(/_/g, ' ') };
   clienteActual = ok ? { token: r.token || r.cliente.token, ...r.cliente } : null;
 
-  const banner = $('#banner-resultado');
-  banner.className = 'banner ' + (ok ? 'ok' : r.estado === 'TOPE' ? 'aviso' : 'mal');
-  $('#icono-resultado').textContent = ok ? '✓' : r.estado === 'TOPE' ? '!' : '✕';
-  $('#texto-resultado').textContent = ok ? 'VÁLIDO' : r.estado.replace('_', ' ');
-  $('#motivo-resultado').textContent = [r.motivo, tienda && ok ? tienda.beneficio : ''].filter(Boolean).join(' · ');
+  $('#banner-resultado').className = 'banner ' + info.color;
+  $('#icono-resultado').textContent = info.signo;
+  $('#texto-resultado').textContent = info.titulo;
+  $('#motivo-resultado').textContent =
+    ok ? [tienda && tienda.beneficio, r.motivo].filter(Boolean).join(' · ')
+       : [r.motivo, info.hacer].filter(Boolean).join(' · ');
 
   const c = r.cliente;
-  $('#nombre-cliente').textContent = c ? c.nombre : 'Tarjeta no reconocida';
+  $('#nombre-cliente').textContent = c ? c.nombre : 'Tarjeta sin titular';
   $('#doc-cliente').textContent = c ? `DNI ${c.doc}` : '—';
   $('#foto-cliente').innerHTML = c && c.foto ? `<img src="${c.foto}" alt="">` : (c ? c.nombre[0] : '?');
+  $('.aviso').classList.toggle('oculto', !c);
+
+  // Las condiciones del beneficio, a la vista al momento de cobrar.
+  const minimo = tienda && tienda.montoMinimo;
+  $('#nota-monto').textContent = minimo ? `Consumo mínimo: S/ ${minimo.toFixed(2)}` : (tienda?.condiciones || '');
+  $('#nota-monto').classList.toggle('oculto', !$('#nota-monto').textContent);
+
   $('#bloque-monto').classList.toggle('oculto', !ok);
   $('#input-monto').value = '';
   irA('p-resultado');

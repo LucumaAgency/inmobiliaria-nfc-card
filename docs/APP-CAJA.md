@@ -81,3 +81,23 @@ public/estilos.css     Marca Proba (amarillo #FBB900, negro, fondo blanco).
 - [ ] Fotos de clientes (hoy `foto: null`, se muestra la inicial).
 - [ ] Rate limiting en `/api/login` y `/api/validar`.
 - [ ] Panel del dueño de tienda y panel de administración de Lucuma.
+
+## Estados en pantalla
+
+El color ocupa el banner completo para que el cajero decida de reojo. Cada estado dice además qué hacer.
+
+| Estado | Color | Qué ve el cajero |
+|---|---|---|
+| `VALIDO` | Verde | El beneficio de la tienda |
+| `TOPE` | Ámbar | Ya la usó hoy. Cobra sin descuento |
+| `DIA_NO_VALIDO` | Ámbar | Hoy no aplica. Cobra sin descuento |
+| `SIN_ACTIVAR` | Pizarra | El cliente debe activarla desde su celular |
+| `SIN_BENEFICIO` | Pizarra | La tienda no tiene beneficio vigente. Avisar a Proba |
+| `VENCIDA` | Rojo | Derivar a Proba para renovar |
+| `SUSPENDIDA` | Rojo | No aplicar el descuento |
+| `BLOQUEADA` | Rojo | Reportada como perdida |
+| `NO_EXISTE` | Rojo | Revisar el código o buscar por DNI |
+
+Los dos estados en pizarra no son errores del cliente ni de la tarjeta: son situaciones que se resuelven fuera de la caja. Por eso no van en rojo, que el cajero asocia a rechazo.
+
+`test/estados.test.js` verifica que la app cubra todos los estados que devuelven las reglas. Si se agrega uno nuevo al servidor y se olvida la interfaz, las pruebas fallan.

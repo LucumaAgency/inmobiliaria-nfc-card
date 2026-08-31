@@ -1,7 +1,7 @@
 /* ProbaCard - marca Proba: amarillo #FBB900, negro, blanco. Fondo siempre blanco. */
 :root{
   --amarillo:#FBB900; --negro:#141414; --gris:#6B6B6B; --linea:#E4E4E4;
-  --ok:#1B8A4B; --mal:#C4282B; --aviso:#B26A00; --radio:12px;
+  --ok:#1B8A4B; --mal:#C4282B; --aviso:#B26A00; --info:#2F4858; --radio:12px;
 }
 *{box-sizing:border-box}
 body{margin:0;background:#fff;color:var(--negro);
@@ -40,7 +40,8 @@ input:focus{outline:2px solid var(--amarillo);border-color:var(--amarillo)}
 
 /* resultado */
 .banner{padding:28px 16px;text-align:center;color:#fff}
-.banner.ok{background:var(--ok)} .banner.mal{background:var(--mal)} .banner.aviso{background:var(--aviso)}
+.banner.ok{background:var(--ok)} .banner.mal{background:var(--mal)}
+.banner.aviso{background:var(--aviso)} .banner.info{background:var(--info)}
 .icono-grande{font-size:48px;line-height:1}
 .texto-resultado{font-size:30px;font-weight:800;letter-spacing:1px}
 .motivo{font-size:15px;opacity:.95;margin-top:4px}
@@ -52,6 +53,7 @@ input:focus{outline:2px solid var(--amarillo);border-color:var(--amarillo)}
 .nombre{font-size:21px;font-weight:700}
 .doc{color:var(--gris);font-size:14px}
 .aviso{margin:0 16px;color:var(--gris);font-size:13px}
+.nota-monto{margin:0;color:var(--aviso);font-size:13.5px;font-weight:600}
 #bloque-monto{padding:16px;display:flex;flex-direction:column;gap:12px}
 #p-resultado .btn.secundario{margin:0 16px 20px;width:calc(100% - 32px)}
 
