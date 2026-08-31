@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tiendas afiliadas · ProbaCard</title>
+<link rel="icon" href="/icon-192.png">
+<link rel="stylesheet" href="/tarjeta/carnet.css">
+<style>
+  main{max-width:560px}
+  .titulo{font-size:26px;font-weight:800;letter-spacing:-.6px;margin:0}
+  .bajada{color:var(--gris);margin:2px 0 0;font-size:15px}
+  .rubros{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+  .rubros button{
+    background:#fff;border:1.5px solid var(--linea);border-radius:99px;padding:7px 15px;
+    font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit;color:var(--negro);
+  }
+  .rubros button.activo{background:var(--amarillo);border-color:var(--amarillo)}
+  .lista{display:flex;flex-direction:column;gap:10px}
+  .tienda{border:1.5px solid var(--linea);border-radius:var(--radio);padding:16px}
+  .tienda h3{margin:0;font-size:17px}
+  .tienda .beneficio{
+    display:inline-block;background:var(--amarillo);border-radius:99px;
+    padding:3px 11px;font-size:13px;font-weight:700;margin:8px 0 6px;
+  }
+  .tienda .donde,.tienda .condiciones{color:var(--gris);font-size:13.5px;margin:2px 0 0}
+  .volver{color:var(--gris);text-decoration:none;font-size:14px;font-weight:600}
+</style>
+</head>
+<body>
+<main>
+  <a class="volver" href="javascript:history.back()">Volver</a>
+  <div>
+    <h1 class="titulo">Tiendas afiliadas</h1>
+    <p class="bajada">Presenta tu ProbaCard en caja para acceder al beneficio.</p>
+  </div>
+  <div class="rubros" id="rubros"></div>
+  <div class="lista" id="lista"><p class="cargando">Cargando...</p></div>
+</main>
+
+<script>
+const $ = s => document.querySelector(s);
+let tiendas = [], rubroActivo = null;
+
+function pintar() {
+  const visibles = rubroActivo ? tiendas.filter(t => t.rubro === rubroActivo) : tiendas;
+  $('#lista').innerHTML = visibles.length ? visibles.map(t => `
+    <div class="tienda">
+      <h3>${t.nombre}</h3>
+      ${t.beneficio ? `<div class="beneficio">${t.beneficio}</div>` : ''}
+      ${t.direccion || t.distrito ? `<p class="donde">${[t.direccion, t.distrito].filter(Boolean).join(' · ')}</p>` : ''}
+      ${t.condiciones ? `<p class="condiciones">${t.condiciones}</p>` : ''}
+    </div>`).join('')
+    : '<p class="cargando">No hay tiendas en este rubro todavía.</p>';
+}
+
+function pintarRubros() {
+  const rubros = [...new Set(tiendas.map(t => t.rubro).filter(Boolean))].sort();
+  $('#rubros').innerHTML =
+    `<button class="activo" data-rubro="">Todas</button>` +
+    rubros.map(r => `<button data-rubro="${r}">${r}</button>`).join('');
+  $('#rubros').onclick = ev => {
+    const b = ev.target.closest('button');
+    if (!b) return;
+    rubroActivo = b.dataset.rubro || null;
+    document.querySelectorAll('#rubros button').forEach(x => x.classList.toggle('activo', x === b));
+    pintar();
+  };
+}
+
+fetch('/api/publico/directorio')
+  .then(r => r.json())
+  .then(d => { tiendas = d.tiendas; pintarRubros(); pintar(); })
+  .catch(() => { $('#lista').innerHTML = '<p class="cargando">No se pudo cargar el directorio.</p>'; });
+</script>
+</body>
+</html>

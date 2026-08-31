@@ -23,6 +23,8 @@ npm start                 # http://localhost:3020
 
 - App de caja: `http://localhost:3020`
 - Panel de administración: `http://localhost:3020/panel` (usuario `admin`)
+- Carnet del titular: `http://localhost:3020/c/AB12XY`
+- Directorio de tiendas: `http://localhost:3020/tiendas`
 
 **Usuarios de prueba** (clave `demo123`): `pezon`, `botica`, `gym`.
 **Tarjetas de prueba:** `AB12XY` y `CD34ZW` válidas, `EF56KL` suspendida, `GH78MN` vencida.
@@ -45,11 +47,15 @@ lib/db.js              Pool de MySQL y transacciones.
 lib/claves.js          Hash de claves con scrypt.
 lib/limite.js          Rate limiting en memoria.
 lib/entorno.js         Carga .env sin dependencias.
+lib/fechas.js          Fechas en la zona del programa. Nunca usar UTC para "hoy".
+lib/rutas-publico.js   Carnet del titular, activación y directorio.
 lib/rutas-admin.js     Rutas del panel, separadas de las de caja.
 lib/tokens.js          Generación de códigos de tarjeta.
 migrations/            Esquema versionado. npm run migrate aplica lo que falte.
 grabador/              Grabado de chips con RC522 por USB. Ver grabador/README.md.
 public/admin/          Panel de administración.
+public/tarjeta/        Carnet del titular y activación.
+public/tiendas/        Directorio público de tiendas afiliadas.
 scripts/migrar.js      Runner de migraciones, idempotente.
 scripts/importar-json.js  Pasa data/seed.json a MySQL.
 test/                  21 pruebas de reglas, claves y rate limiting.
@@ -76,7 +82,7 @@ docs/                  Documentación del sistema.
 | Repositorio, pruebas y despliegue | Construido |
 | Base de datos MySQL | Construida y probada |
 | Panel de administración | Construido y probado |
-| Carnet digital y directorio | Pendiente |
+| Carnet digital y directorio | Construido y probado |
 
 ## Despliegue
 

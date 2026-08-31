@@ -66,3 +66,22 @@ test('monto mínimo: rechaza por debajo y acepta igual o encima', () => {
   assert.equal(cumpleMontoMinimo(con, 50).ok, true);
   assert.equal(cumpleMontoMinimo(beneficio, 0).ok, true);
 });
+
+const { nombreCorto, coincideDocumento } = require('../lib/reglas');
+
+test('el carnet público muestra el nombre abreviado', () => {
+  assert.equal(nombreCorto('Juan Pérez Ramos'), 'Juan P. R.');
+  assert.equal(nombreCorto('María Quispe'), 'María Q.');
+  assert.equal(nombreCorto('  Ana  '), 'Ana');
+  assert.equal(nombreCorto(''), '');
+  assert.equal(nombreCorto(null), '');
+});
+
+test('la identificación por documento exige 4 dígitos exactos', () => {
+  assert.equal(coincideDocumento('45879632', '9632'), true);
+  assert.equal(coincideDocumento('45879632', '9631'), false);
+  assert.equal(coincideDocumento('45879632', '632'), false);
+  assert.equal(coincideDocumento('45879632', 'abcd'), false);
+  assert.equal(coincideDocumento('45879632', ''), false);
+  assert.equal(coincideDocumento(null, '9632'), false);
+});

@@ -13,7 +13,8 @@ const { consultar, una, enTransaccion, cerrar } = require('../lib/db');
 const { hashear } = require('../lib/claves');
 
 const archivo = process.argv[2] || path.join(__dirname, '..', 'data', 'seed.json');
-const HOY = new Date().toISOString().slice(0, 10);
+const { hoy } = require('../lib/fechas');
+const HOY = hoy();
 
 (async () => {
   const datos = JSON.parse(fs.readFileSync(archivo, 'utf8'));

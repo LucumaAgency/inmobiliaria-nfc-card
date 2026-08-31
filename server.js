@@ -17,6 +17,7 @@ const { limitar, limpiar } = require('./lib/limite');
 const { verificar: verificarClave } = require('./lib/claves');
 const repos = require('./lib/repos');
 const rutasAdmin = require('./lib/rutas-admin');
+const rutasPublico = require('./lib/rutas-publico');
 const { cerrar } = require('./lib/db');
 
 const PORT = Number(process.env.PORT) || 3020;
@@ -118,7 +119,7 @@ function estatico(res, rel) {
   fs.createReadStream(archivo).pipe(res);
 }
 
-const tokenValido = t => /^[A-Z0-9]{4,12}$/.test(t);
+const { formatoValido: tokenValido } = require('./lib/tokens');
 
 /** Forma que la app del cajero espera para la tienda. */
 function tiendaPublica(t) {
@@ -143,6 +144,15 @@ const server = http.createServer(async (req, res) => {
         entorno: process.env.NODE_ENV || 'development',
         hora: new Date().toISOString()
       });
+    }
+
+    // Rutas públicas: carnet del titular, activación y directorio.
+    if (ruta.startsWith('/api/publico/')) {
+      const jsonPublico = (code, obj) => json(res, code, obj);
+      if (await rutasPublico.manejar({
+        ruta, req, url, json: jsonPublico,
+        leerCuerpo: () => leerCuerpo(req), ip: ipDe(req)
+      })) return;
     }
 
     // ------------------------------------------------------------- login
@@ -314,16 +324,23 @@ const server = http.createServer(async (req, res) => {
       return json(res, 200, { tiendas: await repos.tiendas.directorio() });
     }
 
-    // La URL grabada en el chip. El destino depende de quién la abre.
+    // La URL grabada en el chip. Una sola dirección, tres destinos:
+    // el cajero va a la pantalla de validación; cualquier otro, a su carnet
+    // (que a su vez muestra la activación si la tarjeta está en blanco).
     if (ruta.startsWith('/c/')) {
       const token = ruta.slice(3).toUpperCase();
       if (!tokenValido(token)) { res.writeHead(302, { Location: '/' }); return res.end(); }
-      res.writeHead(302, { Location: `/?t=${encodeURIComponent(token)}` });
+      const destino = usuario && (usuario.rol === 'caja' || usuario.rol === 'admin')
+        ? `/?t=${encodeURIComponent(token)}`
+        : `/tarjeta?t=${encodeURIComponent(token)}`;
+      res.writeHead(302, { Location: destino });
       return res.end();
     }
 
     if (ruta === '/' || ruta === '/caja') return estatico(res, 'index.html');
     if (ruta === '/panel' || ruta === '/panel/') return estatico(res, 'admin/index.html');
+    if (ruta === '/tarjeta' || ruta === '/tarjeta/') return estatico(res, 'tarjeta/index.html');
+    if (ruta === '/tiendas' || ruta === '/tiendas/') return estatico(res, 'tiendas/index.html');
     return estatico(res, ruta.slice(1));
 
   } catch (e) {

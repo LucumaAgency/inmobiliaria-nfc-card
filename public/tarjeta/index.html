@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mi ProbaCard</title>
+<link rel="icon" href="/icon-192.png">
+<link rel="stylesheet" href="/tarjeta/carnet.css">
+</head>
+<body>
+
+<main id="contenido">
+  <p class="cargando">Cargando tu tarjeta...</p>
+</main>
+
+<!-- CARNET -->
+<template id="tpl-carnet">
+  <div class="carnet">
+    <div class="carnet-cabecera">
+      <span class="marca">Proba<span>Card</span></span>
+      <span class="estado"></span>
+    </div>
+    <div class="nombre"></div>
+    <div class="meta"></div>
+  </div>
+
+  <div class="ahorro">
+    <div class="ahorro-cifra"></div>
+    <div class="ahorro-texto"></div>
+  </div>
+
+  <div class="acciones">
+    <a class="btn" href="/tiendas">Ver tiendas afiliadas</a>
+    <button class="btn secundario" data-accion="historial">Mi historial</button>
+    <button class="btn texto" data-accion="perdida">Reportar tarjeta perdida</button>
+  </div>
+
+  <div class="panel-identidad oculto">
+    <p class="explica"></p>
+    <label>Últimos 4 dígitos de tu documento
+      <input class="doc" inputmode="numeric" maxlength="4" placeholder="9632">
+    </label>
+    <button class="btn" data-accion="confirmar">Continuar</button>
+    <button class="btn texto" data-accion="cancelar">Cancelar</button>
+    <p class="error oculto"></p>
+  </div>
+
+  <div class="historial oculto"></div>
+</template>
+
+<!-- ACTIVACIÓN -->
+<template id="tpl-activar">
+  <div class="carnet en-blanco">
+    <span class="marca">Proba<span>Card</span></span>
+    <div class="nombre">Activa tu tarjeta</div>
+    <div class="meta">Código <span class="mono token"></span></div>
+  </div>
+
+  <form class="formulario">
+    <label>Nombre completo<input name="nombre" required autocomplete="name"></label>
+    <label>Documento<input name="doc" inputmode="numeric" required autocomplete="off"></label>
+    <label>Celular<input name="celular" inputmode="numeric" maxlength="9" autocomplete="tel"></label>
+    <label>Correo<input name="correo" type="email" autocomplete="email"></label>
+    <label class="casilla">
+      <input type="checkbox" name="consentimiento" required>
+      Acepto el tratamiento de mis datos para el programa de beneficios, según la Ley 29733.
+    </label>
+    <button class="btn" type="submit">Activar mi tarjeta</button>
+    <p class="error oculto"></p>
+  </form>
+</template>
+
+<script src="/tarjeta/carnet.js"></script>
+</body>
+</html>
