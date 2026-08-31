@@ -71,6 +71,7 @@ docs/                  Documentación del sistema.
 | [`docs/CHECKLIST-DESARROLLO.md`](docs/CHECKLIST-DESARROLLO.md) | Plan de trabajo por fases, esquema de MySQL y despliegue |
 | [`docs/APP-CAJA.md`](docs/APP-CAJA.md) | La PWA del cajero: API, decisiones de diseño y cómo probarla |
 | [`grabador/README.md`](grabador/README.md) | Grabado y bloqueo de chips: Web NFC y RC522 |
+| [`docs/GUION-VIDEO-CAJA.md`](docs/GUION-VIDEO-CAJA.md) | Guion del video de capacitación para cajeros |
 
 ---
 
