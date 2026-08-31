@@ -228,15 +228,21 @@ El cliente saca la tarjeta y la apoya sobre el celular del cajero. Su propio tel
 └──────────────────────────────┘
 ```
 
-Cinco estados posibles. El color a pantalla completa es deliberado: el cajero decide de reojo, sin leer.
+Nueve estados posibles. El color a pantalla completa es deliberado: el cajero decide de reojo, sin leer. Cada uno dice además qué hacer.
 
-| Estado | Color | Mensaje |
+| Estado | Color | Qué hace el cajero |
 |---|---|---|
-| VÁLIDO | Verde | El beneficio de esa tienda |
-| SUSPENDIDA | Rojo | Tarjeta suspendida |
-| VENCIDA | Rojo | Venció el 2025-01-01 |
-| NO EXISTE | Rojo | Tarjeta no registrada |
-| TOPE | Ámbar | Ya usó el beneficio hoy |
+| VÁLIDO | Verde | Aplica el descuento |
+| YA LA USÓ HOY | Ámbar | Cobra sin descuento; el tope diario está alcanzado |
+| HOY NO APLICA | Ámbar | El beneficio no corre este día de la semana |
+| SIN ACTIVAR | Pizarra | El cliente debe activarla desde su celular |
+| SIN BENEFICIO | Pizarra | La tienda no tiene beneficio vigente; avisar a Proba |
+| VENCIDA | Rojo | Derivar a Proba para renovar |
+| SUSPENDIDA | Rojo | No aplicar el descuento |
+| BLOQUEADA | Rojo | Fue reportada como perdida |
+| NO REGISTRADA | Rojo | Revisar el código o buscar por DNI |
+
+**Los dos estados en pizarra no son rechazos.** La tarjeta está bien y el cliente no hizo nada mal: son situaciones que se resuelven fuera de la caja, y en el caso de SIN BENEFICIO el problema es de configuración, no del cliente. Si fueran rojos, el cajero los leería como "tarjeta mala" y trataría mal a quien no tiene la culpa.
 
 **Olvidó la tarjeta:** se despliega "El cliente olvidó su tarjeta", se escribe el DNI, sale la lista y se toca al cliente. El flujo sigue igual.
 
@@ -437,6 +443,39 @@ Al pasar de 500 tarjetas, o si el cliente quiere reutilizar tarjetas devueltas: 
 
 Regla de fondo: no invertir en seguridad del chip antes de tener fraude que medir. Invertir en que el cajero no abandone la app, que es lo que sí puede matar el proyecto.
 
+## 3.5 Zona horaria: por qué importa
+
+Un detalle de implementación que merece estar documentado, porque se encontró como bug y habría sido muy difícil de diagnosticar en producción.
+
+El sistema calculaba "hoy" con la fecha **UTC**. En Perú (UTC-5) eso adelanta el día desde las 19:00, con cuatro consecuencias reales:
+
+- **El tope diario se reiniciaba a las 7 de la noche.** Un cliente podía usar el mismo beneficio dos veces cada noche.
+- Una tarjeta que vencía hoy se leía como vencida.
+- Los beneficios limitados a ciertos días cambiaban de día antes de tiempo.
+- Un beneficio creado de noche nacía sin estar vigente.
+
+En producción esto aparece como "a veces el descuento se aplica dos veces" y cuesta semanas encontrarlo, porque solo ocurre en un rango de horas.
+
+**La regla:** ninguna fecha se calcula con UTC ni con la hora local del servidor. El Plesk puede estar en UTC. Todo pasa por una zona horaria explícita del programa (`ZONA_HORARIA`, Lima por defecto). El conteo de canjes del día usa un rango calculado en esa zona, no `DATE(fecha) = CURDATE()`, que dependía de la zona de MySQL.
+
+Si el programa se expandiera a otro país, esa variable es lo único que hay que cambiar.
+
+## 3.6 Material de capacitación
+
+Sin esto el software no sirve: un cajero que no entiende la app deja de usarla en una semana, y ahí muere el programa.
+
+**Guía de caja imprimible.** Una hoja con la instalación en Android y en iPhone, el canje en cinco pasos, los nueve colores con su acción, y las situaciones frecuentes (olvidó la tarjeta, se cayó el internet, la foto no coincide). Se entrega impresa y pegada junto a la caja. Archivo: `instructivo-caja.html`, con estilos de impresión listos para exportar a PDF.
+
+Tres reglas fijas que la guía repite:
+
+- Siempre comparar la foto con la persona. Es el único control real contra el uso de tarjetas ajenas.
+- Siempre registrar el monto. Sin ese dato no se puede demostrar a la tienda cuánto le aportó el programa.
+- Nunca discutir un rechazo con el cliente. El cajero no puede saber el motivo y no es su responsabilidad.
+
+**Video de dos minutos.** Vertical, con subtítulos quemados porque se ve en el celular y sin audio. Abre con el beneficio para la tienda antes que con la app. Guion completo con marcas de tiempo en [`docs/GUION-VIDEO-CAJA.md`](GUION-VIDEO-CAJA.md).
+
+Del mismo rodaje salen tres cortes que en la práctica se usan más que el video completo: el canje (25 s), sin internet (20 s) y los colores (25 s).
+
 ## 4. Modelo de negocio
 
 Es lo que suele matar estos proyectos.
@@ -468,10 +507,33 @@ No construir todo de una.
 
 Ahí se aprenden las reglas reales de negocio y recién entonces se invierte en app offline y chips antifraude.
 
+## 8. Estado del desarrollo
+
+| Pieza | Estado |
+|---|---|
+| App de caja: validación, offline, cola de canjes, nueve estados | Construida y probada |
+| Base de datos MySQL con migraciones versionadas | Construida y probada |
+| Endurecimiento: scrypt, rate limiting, cookies seguras, auditoría | Construido |
+| Panel de administración: lotes, emisión, tarjetas, tiendas, reportes | Construido y probado |
+| Grabador de chips: Web NFC y RC522 por USB | Construido, falta probar con hardware |
+| Carnet del titular, autoactivación y directorio público | Construidos y probados |
+| Repositorio, pruebas automatizadas y despliegue | Construidos |
+| Material de capacitación | Redactado, falta producir el video |
+| Puesta en producción en Plesk | Pendiente: falta el servidor |
+
+Código en `LucumaAgency/inmobiliaria-nfc-card`. El plan de trabajo por fases, el esquema de la base y el detalle del despliegue están en [`CHECKLIST-DESARROLLO.md`](CHECKLIST-DESARROLLO.md).
+
 ## Pendientes por definir
 
-- Modelo de cobro a tiendas (fee, comisión o gratis).
-- Rubros y tiendas del piloto.
-- Dominio para las URLs de tarjeta.
-- Proveedor de impresión de tarjetas PVC con chip.
-- Si el programa se conecta o no con ProbaCard (programa QR de propietarios y colaboradores).
+Ordenados por urgencia. El primero bloquea la producción de tarjetas.
+
+- [ ] **Dominio definitivo.** Queda impreso en cada tarjeta y no se puede cambiar después. Es la única decisión verdaderamente irreversible del proyecto.
+- [ ] Servidor Plesk con certificado y los secrets cargados en GitHub, para que el despliegue empiece a correr.
+- [ ] Proveedor de impresión y costo real por tarjeta, para confirmar el margen.
+- [ ] Confirmar que las tarjetas son NTAG213/215/216 y no MIFARE Classic.
+- [ ] Vigencia de las tarjetas: uno o dos años. Va impresa.
+- [ ] Modelo de cobro a las tiendas afiliadas (fee, comisión o gratis).
+- [ ] Rubros y tiendas del piloto.
+- [ ] Número de WhatsApp de soporte, que aparece en la guía y en el video.
+- [ ] Proveedor de WhatsApp para los avisos automáticos.
+- [ ] Si el programa se conecta con el ProbaCard de propietarios y colaboradores, o corre por separado.

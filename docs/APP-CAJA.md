@@ -6,8 +6,12 @@ Node puro, sin dependencias npm. Base de datos en `data/db.json`.
 ## Correr en local
 
 ```bash
-node server.js          # http://localhost:3020
+npm run migrate         # esquema
+npm run importar        # datos de prueba
+npm start               # http://localhost:3020
 ```
+
+Requiere MySQL configurado en `.env`. Ver el README del repositorio.
 
 Usuarios demo (clave `demo123` en los tres):
 
@@ -17,7 +21,7 @@ Usuarios demo (clave `demo123` en los tres):
 | `botica` | Botica Salud Norte | 10% en genéricos (2 usos/día) |
 | `gym` | Gimnasio Fuerza Lima | 20% en mensualidad (1 uso/día) |
 
-Tarjetas demo, para probar los cuatro estados:
+Tarjetas demo:
 
 | Código | Cliente | DNI | Estado esperado |
 |---|---|---|---|
@@ -35,20 +39,21 @@ Escribe el código a mano o entra a `/c/AB12XY`, que es la URL que va grabada en
 3. **Tarjeta olvidada:** despliega "El cliente olvidó su tarjeta" y busca por DNI `45879632`.
 4. **Offline:** DevTools → Network → Offline. Valida `CD34ZW` (responde con el padrón cacheado)
    y registra el canje: queda en cola. Vuelve a Online y se sube solo.
+   Sin conexión no se aplica el tope diario: la app no conoce los canjes del día.
 5. **Instalación:** DevTools → Application → Manifest / Service Workers. En Android sale el
    botón "Instalar"; en iPhone hay que usar Compartir → Agregar a inicio.
 
 ## Qué hay dentro
 
 ```
-server.js              API + estáticos. Sesión por cookie firmada con HMAC (30 días).
-data/db.json           Tiendas, usuarios, clientes y canjes.
 public/index.html      Las 4 pantallas: login, caja, resultado, menú.
-public/app.js          Lógica: IndexedDB, cola offline, Web NFC, validación.
+public/app.js          IndexedDB, cola offline, Web NFC, tabla de estados.
 public/sw.js           Service worker: caché del armazón, red primero para /api/.
 public/manifest.json   Instalación como PWA.
 public/estilos.css     Marca Proba (amarillo #FBB900, negro, fondo blanco).
 ```
+
+El servidor y las reglas viven en `server.js` y `lib/`. Ver el README del repositorio.
 
 ## API
 
@@ -60,6 +65,12 @@ public/estilos.css     Marca Proba (amarillo #FBB900, negro, fondo blanco).
 | `GET /api/validar/:token` | Evalúa la tarjeta contra las reglas de esa tienda. |
 | `GET /api/buscar?q=` | Respaldo por DNI o celular. |
 | `POST /api/canje` | Registra canjes. Acepta lote (la cola offline) y es idempotente por `idLocal`. |
+| `GET /api/publico/tarjeta/:token` | Carnet del titular, sin sesión y con datos limitados. |
+| `POST /api/publico/historial` | Historial, tras identificarse con 4 dígitos del documento. |
+| `POST /api/publico/perdida` | Reporta la tarjeta como perdida. |
+| `POST /api/publico/activar` | Autoactivación de una tarjeta en blanco. |
+| `GET /api/publico/directorio` | Tiendas afiliadas. |
+| `/api/admin/*` | Panel. Requiere rol admin. Ver `lib/rutas-admin.js`. |
 | `GET /api/canjes` | Últimos 50 canjes de la tienda. |
 | `GET /c/:token` | La URL del chip NFC. Redirige a la app con el token. |
 
@@ -70,17 +81,19 @@ public/estilos.css     Marca Proba (amarillo #FBB900, negro, fondo blanco).
 - **El canje se guarda en IndexedDB antes de subirlo.** Si el teléfono se apaga o no hay señal,
   no se pierde. El servidor descarta duplicados por `idLocal`.
 - **Sesión de 30 días.** Si el cajero tiene que loguearse cada día, deja de usar la app.
+- **Las fechas nunca usan UTC.** Ver la sección de zona horaria en `DOCUMENTACION.md`.
 - **El servidor manda.** El padrón offline es solo un respaldo; cuando hay red, decide el backend.
 
-## Para producción (pendiente)
+## Para producción
 
-- [ ] HTTPS obligatorio (Let's Encrypt en Plesk). El service worker no arranca sin él.
-- [ ] Claves hasheadas con `scrypt`, no en texto plano como en la demo.
-- [ ] `PROBACARD_SECRET` como variable de entorno real.
-- [ ] Migrar `db.json` a MySQL al pasar de ~5 tiendas.
-- [ ] Fotos de clientes (hoy `foto: null`, se muestra la inicial).
-- [ ] Rate limiting en `/api/login` y `/api/validar`.
-- [ ] Panel del dueño de tienda y panel de administración de Lucuma.
+- [x] Claves hasheadas con `scrypt`
+- [x] `PROBACARD_SECRET` como variable de entorno, obligatoria en producción
+- [x] MySQL con migraciones versionadas
+- [x] Rate limiting en `/api/login`, `/api/validar` y las rutas públicas
+- [x] Panel de administración
+- [ ] HTTPS con Let's Encrypt en Plesk. El service worker no arranca sin él.
+- [ ] Fotos de clientes (hoy `foto: null`, se muestra la inicial)
+- [ ] Panel para el dueño de cada tienda afiliada
 
 ## Estados en pantalla
 
