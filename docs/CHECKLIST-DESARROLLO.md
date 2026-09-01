@@ -22,12 +22,12 @@ Mongo tendría sentido si el esquema fuera cambiante o los volúmenes enormes. N
 
 ## Fase 0 — Repositorio y entorno
 
-- [ ] Crear repo `LucumaAgency/probacard` (privado).
-- [ ] Mover el prototipo de `app/` al repo, con la estructura definitiva.
-- [ ] `.gitignore`: `node_modules`, `.env`, `data/*.json`, `uploads/`.
-- [ ] `.env.example` con todas las variables, sin valores reales.
-- [ ] `package.json` con `engines.node: "22.x"` y scripts `start`, `dev`, `migrate`, `seed`.
-- [ ] README con instrucciones de arranque local.
+- [x] Crear repo (`LucumaAgency/inmobiliaria-nfc-card`). **Falta pasarlo a privado.**
+- [x] Mover el prototipo de `app/` al repo, con la estructura definitiva.
+- [x] `.gitignore`: `node_modules`, `.env`, `data/*.json`, `uploads/`.
+- [x] `.env.example` con todas las variables, sin valores reales.
+- [x] `package.json` con `engines.node: "22.x"` y scripts `start`, `dev`, `migrate`, `seed`.
+- [x] README con instrucciones de arranque local.
 - [ ] Rama `main` protegida; trabajo en `develop` y ramas de feature.
 
 **Variables de entorno a definir:**
@@ -47,9 +47,9 @@ WHATSAPP_TOKEN          # bienvenida y avisos (fase 2)
 ## Fase 1 — Base de datos
 
 - [ ] Crear la base en Plesk y su usuario, con permisos solo sobre esa base.
-- [ ] Escribir `migrations/001_esquema.sql` y correrlo por phpMyAdmin.
-- [ ] Script `seed.js` que cargue las tiendas y tarjetas de prueba.
-- [ ] Script de migración que lleve `db.json` a MySQL (sirve para no perder las pruebas).
+- [x] Escribir `migrations/001_esquema.sql` y correrlo por phpMyAdmin.
+- [x] Semilla versionada (`data/seed.json`) e importador a MySQL.
+- [x] Script de migración que lleve `db.json` a MySQL (sirve para no perder las pruebas).
 - [ ] Configurar respaldo diario en Plesk y **probar una restauración** antes del lanzamiento.
 
 ### Esquema
@@ -158,16 +158,16 @@ CREATE TABLE validaciones (
 
 Lo que hoy está resuelto "a lo demo" y no puede salir así.
 
-- [ ] Reemplazar `db.json` por MySQL con `mysql2/promise` y pool de conexiones.
-- [ ] Claves con **scrypt** (`crypto.scrypt`), nunca texto plano. Migrar los usuarios demo.
-- [ ] `PROBACARD_SECRET` real desde variable de entorno; que el arranque falle si falta.
-- [ ] Cookie de sesión con `Secure` además de `HttpOnly` y `SameSite=Lax`.
-- [ ] Rate limiting en `/api/login` (5 intentos por usuario cada 15 min) y en `/api/validar`.
-- [ ] Validar y sanear toda entrada; consultas siempre parametrizadas.
-- [ ] Registrar en `validaciones` cada consulta, incluidas las que no terminan en canje.
-- [ ] Manejo de errores que no filtre trazas al cliente.
+- [x] Reemplazar `db.json` por MySQL con `mysql2/promise` y pool de conexiones.
+- [x] Claves con **scrypt** (`crypto.scrypt`), nunca texto plano. Migrar los usuarios demo.
+- [x] `PROBACARD_SECRET` real desde variable de entorno; que el arranque falle si falta.
+- [x] Cookie de sesión con `Secure` además de `HttpOnly` y `SameSite=Lax`.
+- [x] Rate limiting en `/api/login` (5 intentos por usuario cada 15 min) y en `/api/validar`.
+- [x] Validar y sanear toda entrada; consultas siempre parametrizadas.
+- [x] Registrar en `validaciones` cada consulta, incluidas las que no terminan en canje.
+- [x] Manejo de errores que no filtre trazas al cliente.
 - [ ] Logs a archivo con rotación.
-- [ ] Endpoint `/api/salud` para monitoreo.
+- [x] Endpoint `/api/salud` para monitoreo.
 
 ---
 
@@ -183,11 +183,11 @@ Lo que hoy está resuelto "a lo demo" y no puede salir así.
 
 ### GitHub Actions
 
-- [ ] Secrets del repo: `PLESK_HOST`, `PLESK_USER`, `PLESK_SSH_KEY`, `PLESK_PATH`.
-- [ ] Workflow en `main`: instalar dependencias, correr pruebas, subir por rsync, `npm ci --omit=dev` en el servidor y reiniciar.
-- [ ] Reinicio de Passenger con `touch tmp/restart.txt`.
-- [ ] Excluir del despliegue: `.git`, `node_modules`, `.env`, `uploads`.
-- [ ] Que el workflow **no pise** `uploads/` ni el `.env` del servidor.
+- [x] Secrets del repo: `PLESK_HOST`, `PLESK_USER`, `PLESK_SSH_KEY`, `PLESK_PATH`.
+- [x] Workflow en `main`: instalar dependencias, correr pruebas, subir por rsync, `npm ci --omit=dev` en el servidor y reiniciar.
+- [x] Reinicio de Passenger con `touch tmp/restart.txt`.
+- [x] Excluir del despliegue: `.git`, `node_modules`, `.env`, `uploads`.
+- [x] Que el workflow **no pise** `uploads/` ni el `.env` del servidor.
 - [ ] Probar el despliegue completo antes de tener datos reales.
 
 ```yaml
@@ -221,49 +221,49 @@ jobs:
 Es la pieza que falta para que el sistema sea operable.
 
 **Tarjetas**
-- [ ] Generar lote: N tokens aleatorios, CSV para el proveedor de impresión.
-- [ ] Listado con filtro por estado y lote.
-- [ ] Pantalla **Grabar lote** con Web NFC: escribir la URL, leer de vuelta, verificar y recién bloquear.
-- [ ] Bloquear tarjeta y reemitir conservando el historial (`reemplaza_a`).
+- [x] Generar lote: N tokens aleatorios, CSV para el proveedor de impresión.
+- [x] Listado con filtro por estado y lote.
+- [x] Pantalla **Grabar lote** con Web NFC: escribir la URL, leer de vuelta, verificar y recién bloquear.
+- [x] Bloquear tarjeta y reemitir conservando el historial (`reemplaza_a`).
 
 **Clientes**
 - [ ] Alta con foto tomada desde la cámara.
-- [ ] Registro del consentimiento con fecha y hora.
-- [ ] Vinculación tarjeta ↔ cliente (el *bind*).
+- [x] Registro del consentimiento con fecha y hora.
+- [x] Vinculación tarjeta ↔ cliente (el *bind*).
 - [ ] Búsqueda, edición y ficha con historial de canjes.
 
 **Tiendas**
-- [ ] Alta de tienda con dirección y coordenadas.
-- [ ] Beneficio con condiciones, tope, monto mínimo y días válidos.
-- [ ] Cambio de beneficio que cierra el anterior en vez de pisarlo.
-- [ ] Usuarios de caja, uno por sucursal.
+- [x] Alta de tienda con dirección y coordenadas.
+- [x] Beneficio con condiciones, tope, monto mínimo y días válidos.
+- [x] Cambio de beneficio que cierra el anterior en vez de pisarlo.
+- [x] Usuarios de caja, uno por sucursal.
 
 **Reportes**
-- [ ] Canjes por día, tienda y rubro.
-- [ ] Ticket promedio y monto total por tienda.
-- [ ] Ratio validaciones / canjes por tienda.
+- [x] Canjes por día, tienda y rubro.
+- [x] Ticket promedio y monto total por tienda.
+- [x] Ratio validaciones / canjes por tienda.
 - [ ] Clientes activos vs dormidos.
-- [ ] Tarjetas emitidas vs activadas.
-- [ ] Exportar a CSV.
+- [x] Tarjetas emitidas vs activadas.
+- [x] Exportar el lote a CSV. Falta exportar reportes.
 
 ---
 
 ## Fase 5 — Carnet digital y directorio
 
-- [ ] `/c/TOKEN` sin sesión de cajero muestra el carnet del cliente.
-- [ ] Carnet: foto, estado, vencimiento y cuánto ha ahorrado.
-- [ ] Datos sensibles solo tras verificación por SMS.
-- [ ] Botón de reportar tarjeta perdida, que bloquea el token al instante.
-- [ ] Directorio público de tiendas con mapa y filtro por rubro.
-- [ ] Formulario de autoactivación para tarjetas `en_blanco`.
+- [x] `/c/TOKEN` sin sesión de cajero muestra el carnet del cliente.
+- [x] Carnet: estado, vencimiento y cuánto ha ahorrado. Falta la foto.
+- [x] Datos sensibles tras identificarse con 4 dígitos del documento. SMS queda para cuando haya proveedor.
+- [x] Botón de reportar tarjeta perdida, que bloquea el token al instante.
+- [x] Directorio público con filtro por rubro. Falta el mapa.
+- [x] Formulario de autoactivación para tarjetas `en_blanco`.
 
 ---
 
 ## Fase 6 — Pruebas
 
-- [ ] Pruebas de las reglas de negocio: tope diario, vencimiento, días válidos, monto mínimo.
-- [ ] Prueba de idempotencia de la cola (mismo `id_local` dos veces).
-- [ ] Prueba de canje offline y su sincronización posterior.
+- [x] Pruebas de las reglas de negocio: tope diario, vencimiento, días válidos, monto mínimo.
+- [x] Prueba de idempotencia de la cola (mismo `id_local` dos veces).
+- [x] Prueba de canje offline y su sincronización posterior (por API).
 - [ ] Prueba de canje offline **rechazado** al sincronizar (tarjeta suspendida entre medio).
 - [ ] Prueba en dispositivos reales: Android con NFC, iPhone XS o superior, iPad con QR.
 - [ ] Lighthouse: auditoría de PWA en verde.
@@ -278,7 +278,7 @@ Es la pieza que falta para que el sistema sea operable.
 - [ ] Política de privacidad y términos publicados.
 - [ ] Contrato de encargo de tratamiento firmado con cada tienda del piloto.
 - [ ] Textos de consentimiento revisados.
-- [ ] Video y PDF instructivo de la app de caja.
+- [x] Video y PDF instructivo de la app de caja.
 - [ ] Capacitación a los cajeros del piloto.
 - [ ] Canal de WhatsApp de soporte operativo.
 - [ ] Google Analytics en directorio y carnet.
