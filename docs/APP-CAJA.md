@@ -101,7 +101,7 @@ El color ocupa el banner completo para que el cajero decida de reojo. Cada estad
 
 | Estado | Color | Qué ve el cajero |
 |---|---|---|
-| `VALIDO` | Verde | El beneficio de la tienda |
+| `VALIDO` | Verde | El beneficio de la tienda y el documento del titular |
 | `TOPE` | Ámbar | Ya la usó hoy. Cobra sin descuento |
 | `DIA_NO_VALIDO` | Ámbar | Hoy no aplica. Cobra sin descuento |
 | `SIN_ACTIVAR` | Pizarra | El cliente debe activarla desde su celular |

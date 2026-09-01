@@ -19,15 +19,15 @@ Programa de tarjeta de descuentos para clientes, con chip NFC y red de tiendas a
 ## 2. El backend (el corazón del sistema)
 
 - Base de datos con: cliente, tarjeta (una tarjeta puede reemplazarse y el cliente sigue), estado (activa / suspendida / perdida), fecha de vencimiento.
-- **Endpoint de validación:** recibe el token de la tarjeta más el ID de la tienda y responde vigente / no vigente, nombre, foto y qué descuento aplica en esa tienda.
+- **Endpoint de validación:** recibe el token de la tarjeta más el ID de la tienda y responde vigente / no vigente, nombre, documento y qué descuento aplica en esa tienda.
 - **Registro de cada canje:** fecha, hora, tienda, monto de la compra, descuento aplicado. Esto es lo que después se vende como valor a las tiendas afiliadas.
 - **Reglas por tienda:** no todas dan lo mismo. Se necesita una tabla tienda × beneficio × condiciones (tope de usos, días válidos, monto mínimo, exclusión de promociones).
-- **Antifraude básico:** límite de canjes por día, alerta si la misma tarjeta se usa en dos ciudades con minutos de diferencia, y foto del titular en pantalla para que el cajero compare.
+- **Antifraude básico:** límite de canjes por día, alerta si la misma tarjeta se usa en dos ciudades con minutos de diferencia, y documento del titular en pantalla para que el cajero lo compare con el DNI físico.
 
 ## 3. La app de la tienda
 
 - **Modo offline:** las tiendas tienen internet malo. Hace falta caché local de tarjetas válidas y cola de canjes que se suben al recuperar señal. Sin eso, el día que se cae el wifi el sistema no existe.
-- Flujo del cajero en 3 toques máximo: escanear, ver "VÁLIDO / Juan Pérez / 15% dcto", confirmar monto. Si se le pide más, no lo usa.
+- Flujo del cajero en 3 toques máximo: escanear, ver "VÁLIDO / Juan Pérez / DNI / 15% dcto", confirmar monto. Si se le pide más, no lo usa.
 - **PWA vs app nativa:** en Android, una PWA con Web NFC funciona; en iOS, Web NFC no existe, así que haría falta app nativa o depender del QR. La opción más pragmática: **PWA con QR más lectura NFC nativa del iPhone vía URL** (el iPhone lee un NTAG con URL y abre el navegador sin necesidad de app). Ese camino ahorra desarrollar nativo.
 - Usuarios por tienda, no una cuenta compartida, para saber qué sucursal y qué cajero canjeó.
 - Panel para el dueño de la tienda: cuántos canjes y cuánto facturó por el programa.
@@ -58,7 +58,7 @@ El punto crítico: **el flujo del cajero no puede depender de Web NFC**, porque 
 
 Arquitectura recomendada — **todo pasa por la URL**. La tarjeta lleva `https://probacard.tudominio.com/c/AB12XY`. Esa URL es una página web que:
 
-1. Si el cajero ya tiene sesión iniciada en su navegador, muestra directo la pantalla de validación con nombre, foto y descuento aplicable.
+1. Si el cajero ya tiene sesión iniciada en su navegador, muestra directo la pantalla de validación con nombre, documento y descuento aplicable.
 2. Si no hay sesión, pide login.
 
 Así el flujo es idéntico en Android y iOS y no depende de ninguna API especial. El sistema operativo abre la URL, la web hace el resto.
@@ -118,8 +118,8 @@ Aclaración importante: **el teléfono del cliente no participa en el canje.** E
 
 1. El cliente compra, llega a caja y menciona que tiene ProbaCard.
 2. Saca la tarjeta y la apoya sobre el celular del cajero, o se la entrega.
-3. El celular **del cajero** lee el NFC, abre la URL y la web muestra: `VÁLIDO · Juan Pérez · [foto] · 15% dcto`.
-4. El cajero compara la foto, aplica el descuento, digita el monto y confirma.
+3. El celular **del cajero** lee el NFC, abre la URL y la web muestra: `VÁLIDO · Juan Pérez · DNI 45879632 · 15% dcto`.
+4. El cajero pide el DNI, compara el número con la pantalla, aplica el descuento, digita el monto y confirma.
 5. El sistema registra el canje.
 
 Total: unos 10 segundos. El cliente solo estira la mano.
@@ -170,20 +170,20 @@ La alternativa (grabar el chip cuando llega el cliente) obliga a tener un equipo
 
 ### Etapa 2 — Entrega y activación
 
-**Camino A: activación asistida (recomendado para el piloto).** El vendedor abre el panel en su celular, sección "Emitir tarjeta":
+**Camino A: activación asistida (recomendado para el piloto).** El vendedor abre el panel, sección "Emitir tarjeta":
 
 1. Toma la tarjeta física del fajo.
 2. La acerca a su celular o escanea el QR. El panel lee `AB12XY` y responde: "Tarjeta en blanco, disponible".
 3. Llena el formulario: nombre, DNI, celular, correo, fecha de nacimiento.
-4. Toma la foto del cliente con la cámara.
+4. Carga sus datos.
 5. El cliente firma el consentimiento de datos en pantalla.
 6. Emitir.
 
 El servidor hace el *bind*: la tarjeta pasa de `en_blanco` a `activa` y queda ligada al cliente. Se envía SMS o WhatsApp de bienvenida con el link al directorio de tiendas.
 
-Ventaja: la tarjeta sale funcionando de la mano del vendedor y la foto queda bien tomada, que es clave para que el cajero pueda comparar.
+Ventaja: la tarjeta sale funcionando de la mano del vendedor y los datos quedan bien cargados, que es clave para que el cajero pueda comparar el documento.
 
-**Camino B: autoactivación.** Se entrega la tarjeta apagada; el cliente la acerca a su teléfono o escanea el QR, cae en `/c/AB12XY` y, como está `en_blanco`, ve el formulario de registro. Verifica su celular por SMS, sube una selfie y acepta términos.
+**Camino B: autoactivación.** Se entrega la tarjeta apagada; el cliente la acerca a su teléfono o escanea el QR, cae en `/c/AB12XY` y, como está `en_blanco`, ve el formulario de registro. Verifica su celular por SMS, y acepta términos.
 
 Ventaja: cero trabajo. Desventaja: **entre 30% y 50% nunca la activa.** Si se usa, hacen falta recordatorios automáticos a los 2 y 7 días.
 
@@ -215,11 +215,11 @@ El cliente saca la tarjeta y la apoya sobre el celular del cajero. Su propio tel
 │  VÁLIDO                      │  <- banner verde a pantalla completa
 │  15% en carta                │
 ├──────────────────────────────┤
-│  [foto]  Juan Pérez Ramos    │
-│          DNI 45879632        │
+│  Juan Pérez Ramos            │
+│  DNI  4 5 8 7 9 6 3 2        │
 │                              │
-│  Compara la foto y el        │
-│  documento con la persona.   │
+│  Pide el DNI y compara el    │
+│  número con la pantalla.     │
 │                              │
 │  Monto de la compra (S/)     │
 │  [ 85.50            ]        │
@@ -255,7 +255,6 @@ Va a pasar seguido: la gente prueba su tarjeta por curiosidad. Como no tiene ses
 ```
 ┌──────────────────────────────┐
 │   ProbaCard                  │
-│   [foto]                     │
 │   Juan Pérez Ramos           │
 │   Socio desde ago 2026       │
 │   Vence: ago 2027   ● ACTIVA │
@@ -281,7 +280,7 @@ Son tres, con permisos distintos.
 
 **Panel de ProbaCard (interno).**
 - Tarjetas: lote, estado (en blanco / activa / suspendida / perdida / vencida), a quién está ligada; bloquear y reemitir.
-- Clientes: alta, edición, foto, historial, exportar.
+- Clientes: alta, edición, historial, exportar.
 - Tiendas: alta, beneficio, condiciones, tope diario, días válidos, monto mínimo.
 - Usuarios de caja: uno por sucursal, nunca cuentas compartidas.
 - Reportes: canjes por día, tienda y rubro; ticket promedio; clientes activos vs dormidos; tarjetas emitidas vs activadas.
@@ -296,7 +295,7 @@ Son tres, con permisos distintos.
 | Momento | Qué se captura | Dónde queda |
 |---|---|---|
 | Fabricación | Token, lote, fecha | Tabla `tarjetas`, estado `en_blanco` |
-| Activación | Nombre, DNI, celular, correo, foto, consentimiento con fecha y hora | Tabla `clientes` + bind a la tarjeta |
+| Activación | Nombre, DNI, celular, correo, consentimiento con fecha y hora | Tabla `clientes` + bind a la tarjeta |
 | Validación en caja | Token, tienda, cajero, resultado, si fue offline | Log de consultas |
 | Canje | Cliente, tienda, cajero, monto, beneficio, fecha y hora, offline sí/no | Tabla `canjes` |
 | Sincronización | Cuándo bajó el padrón cada dispositivo | Metadata por dispositivo |
@@ -429,7 +428,7 @@ Bloquear el chip evita que alguien **reescriba** su tarjeta, pero **no evita que
 Lo que protege de verdad ya está en el diseño del sistema:
 
 - El token no vale nada sin el servidor: un clon apunta a la misma URL y el servidor decide.
-- La **foto en pantalla** es el control real; el cajero ve que el clon no coincide con quien lo presenta.
+- El **documento en pantalla** es el control real: el cajero pide el DNI y compara el número.
 - El **tope diario** limita un token clonado a un uso por día.
 - El **log** delata usos raros: la misma tarjeta en dos distritos en 10 minutos.
 
@@ -464,11 +463,11 @@ Si el programa se expandiera a otro país, esa variable es lo único que hay que
 
 Sin esto el software no sirve: un cajero que no entiende la app deja de usarla en una semana, y ahí muere el programa.
 
-**Guía de caja imprimible.** Una hoja con la instalación en Android y en iPhone, el canje en cinco pasos, los nueve colores con su acción, y las situaciones frecuentes (olvidó la tarjeta, se cayó el internet, la foto no coincide). Se entrega impresa y pegada junto a la caja. Archivo: `instructivo-caja.html`, con estilos de impresión listos para exportar a PDF.
+**Guía de caja imprimible.** Una hoja con la instalación en Android y en iPhone, el canje en cinco pasos, los nueve colores con su acción, y las situaciones frecuentes (olvidó la tarjeta, se cayó el internet, el documento no coincide). Se entrega impresa y pegada junto a la caja. Archivo: `instructivo-caja.html`, con estilos de impresión listos para exportar a PDF.
 
 Tres reglas fijas que la guía repite:
 
-- Siempre comparar la foto con la persona. Es el único control real contra el uso de tarjetas ajenas.
+- Siempre pedir el DNI y comparar el número con el de la pantalla. Es el único control real contra el uso de tarjetas ajenas.
 - Siempre registrar el monto. Sin ese dato no se puede demostrar a la tienda cuánto le aportó el programa.
 - Nunca discutir un rechazo con el cliente. El cajero no puede saber el motivo y no es su responsabilidad.
 

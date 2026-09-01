@@ -153,8 +153,8 @@ function mostrarResultado(r) {
 
   const c = r.cliente;
   $('#nombre-cliente').textContent = c ? c.nombre : 'Tarjeta sin titular';
-  $('#doc-cliente').textContent = c ? `DNI ${c.doc}` : '—';
-  $('#foto-cliente').innerHTML = c && c.foto ? `<img src="${c.foto}" alt="">` : (c ? c.nombre[0] : '?');
+  $('#doc-cliente').textContent = c ? c.doc : '—';
+  $('.ficha').classList.toggle('oculto', !c);
   $('.aviso').classList.toggle('oculto', !c);
 
   // Las condiciones del beneficio, a la vista al momento de cobrar.

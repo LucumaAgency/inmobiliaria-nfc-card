@@ -3,7 +3,7 @@
  * Estrategia: red primero para la API, caché primero para el armazón de la app.
  * Sube CACHE cada vez que cambies archivos de public/.
  */
-const CACHE = 'probacard-v2';
+const CACHE = 'probacard-v3';
 const ARMAZON = ['/', '/app.js', '/estilos.css', '/manifest.json', '/icon-192.png', '/icon-512.png'];
 
 self.addEventListener('install', e => {

@@ -227,7 +227,7 @@ Es la pieza que falta para que el sistema sea operable.
 - [x] Bloquear tarjeta y reemitir conservando el historial (`reemplaza_a`).
 
 **Clientes**
-- [ ] Alta con foto tomada desde la cámara.
+- [ ] Alta con foto tomada desde la cámara. **Aplazado:** por ahora el control en caja es comparar el DNI.
 - [x] Registro del consentimiento con fecha y hora.
 - [x] Vinculación tarjeta ↔ cliente (el *bind*).
 - [ ] Búsqueda, edición y ficha con historial de canjes.

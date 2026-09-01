@@ -15,6 +15,7 @@ Video para el personal de caja de las tiendas afiliadas. Se envía por WhatsApp 
 - Un celular Android con la app instalada y sesión iniciada
 - Un iPhone, solo para el plano del banner de iOS
 - Cuatro tarjetas de prueba: una válida, una vencida, una suspendida y una sin activar
+- Un DNI (puede ser el de quien actúa de cliente), para el plano de la comparación
 - Un mostrador real con luz decente. **No grabar sobre un escritorio de oficina:** el cajero tiene que reconocer su propio entorno
 - Una persona que haga de cliente
 
@@ -57,13 +58,13 @@ Video para el personal de caja de las tiendas afiliadas. Se envía por WhatsApp 
 
 **Imagen:** la acción real, en tiempo real. No acelerar.
 
-> **Voz:** Verde es válido. Fíjate en la foto: confirma que es la persona que tienes al frente. Ese paso es el que evita que alguien use una tarjeta ajena.
+> **Voz:** Verde es válido. Pídele el DNI y compara el número con el de la pantalla. Ese paso es el que evita que alguien use una tarjeta ajena.
 
-**Imagen:** primer plano de la pantalla verde. Congelar un segundo sobre la foto.
+**Imagen:** primer plano de la pantalla verde junto al DNI en la mano, con el número visible en ambos. Congelar un segundo.
 
 > **Voz:** Aplicas el descuento en tu caja como siempre, escribes el monto total de la compra y confirmas. Listo.
 
-**Texto en pantalla:** SIEMPRE COMPARA LA FOTO
+**Texto en pantalla:** SIEMPRE PIDE EL DNI
 
 *Nota: este bloque es el corazón del video. Si alguien solo ve 25 segundos, que sean estos.*
 
@@ -106,17 +107,17 @@ Video para el personal de caja de las tiendas afiliadas. Se envía por WhatsApp 
 
 **Imagen:** el cajero atendiendo con normalidad. Nada de gestos de rechazo ni de conflicto.
 
-> **Voz:** Y si la foto no coincide con la persona, no apliques el descuento.
+> **Voz:** Y si el número del DNI no coincide con el de la pantalla, no apliques el descuento.
 
 ---
 
 ### 1:50 a 2:00 · Cierre
 
-> **Voz:** Eso es todo. Acercar, comparar la foto, monto, confirmar. Si algo falla, escríbenos al WhatsApp de soporte, de lunes a sábado.
+> **Voz:** Eso es todo. Acercar, comparar el DNI, monto, confirmar. Si algo falla, escríbenos al WhatsApp de soporte, de lunes a sábado.
 
 **Imagen:** el número de soporte en pantalla, grande y quieto tres segundos completos.
 
-**Texto en pantalla:** ACERCAR · COMPARAR · MONTO · CONFIRMAR
+**Texto en pantalla:** ACERCAR · COMPARAR DNI · MONTO · CONFIRMAR
 
 ---
 
